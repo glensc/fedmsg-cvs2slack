@@ -1,9 +1,14 @@
 #!/usr/bin/python
+# Requires:
+# slackweb Python module from PyPI:
 # https://github.com/satoshi03/slack-python-webhook
+#
+# Setup:
+# Put to CVSROOT/loginfo:
+# ALL $CVSROOT/CVSROOT/slack-cvs-hook $USER %p %{sVv}
 
 import sys
 import subprocess
-from pprint import pprint
 import slackweb
 
 # Get token from https://my.slack.com/services/new/incoming-webhook/
@@ -15,8 +20,10 @@ CHANNEL = "@glen"
 # Username to show in webook
 USERNAME = "CVS Commit"
 
-user, module = sys.argv[1:2]
-files = sys.argv[2:]
+from pprint import pprint
+
+user, module = sys.argv[1:3]
+files = sys.argv[3:]
 
 pprint(user)
 pprint(module)
