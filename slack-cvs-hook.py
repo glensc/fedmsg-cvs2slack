@@ -49,6 +49,11 @@ def get_commit_message():
 
     return "".join(lines[i + 1:]).strip()
 
+def cut(s, maxlen = 24):
+    if len(s) > maxlen:
+        return s[0:maxlen] + "..."
+    return s
+
 from pprint import pprint
 
 user, module = sys.argv[1:3]
@@ -60,5 +65,17 @@ pprint(module)
 pprint(files)
 pprint(commit_msg)
 
+summary = "Commit in %s by %s: %s" % (module, user, cut(commit_msg))
+text = ""
+
 for filename, oldrev, newrev in grouped(files, 3):
-   print "%s : %s->%s" % (filename, oldrev, newrev)
+   text += "%s: %s->%s\n" % (filename, oldrev, newrev)
+
+attachments = [{
+    "fallback": text,
+    "text": text,
+    "color": "good",
+}]
+
+slack = slackweb.Slack(url=HOOK_URL)
+slack.notify(text=summary, attachments=attachments, channel=CHANNEL, username=USERNAME)
