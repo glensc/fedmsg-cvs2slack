@@ -64,7 +64,8 @@ user, module = sys.argv[1:3]
 files = sys.argv[3:]
 commit_msg = get_commit_message()
 
-summary = "in *%s* by *%s*: %s" % (module, user, cut(commit_msg))
+module_url = "%s/%s" % (CVSWEB_URL, module)
+summary = "in *<%s|%s>* by *%s*: %s" % (module_url, module, user, cut(commit_msg))
 text = ""
 
 defopts = { 'url': CVSWEB_URL, 'module': module }
