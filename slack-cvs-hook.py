@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# coding: utf-8
 # Requires:
 # slackweb Python module from PyPI:
 # https://github.com/satoshi03/slack-python-webhook
@@ -20,6 +21,11 @@ CVSWEB_URL = "https://cvs.example.net"
 CHANNEL = "@glen"
 # Username to show in webook
 USERNAME = "CVS Commit"
+
+# viewvc specific
+CO_URL = '%(url)s/%(module)s/%(file)s?rev=%(rev)s&content-type=text/x-cvsweb-markup'
+DIFF_URL = '%(url)s/%(module)s/%(file)s?r1=%(r1)s&r2=%(r2)s&f=h'
+LOG_URL = '%(url)s/%(module)s/%(file)s?r1=%(rev)s#rev%(rev)s'
 
 # http://stackoverflow.com/a/5389547
 def grouped(iterable, n):
@@ -54,22 +60,32 @@ def cut(s, maxlen = 24):
         return s[0:maxlen] + "..."
     return s
 
-from pprint import pprint
-
 user, module = sys.argv[1:3]
 files = sys.argv[3:]
 commit_msg = get_commit_message()
 
-pprint(user)
-pprint(module)
-pprint(files)
-pprint(commit_msg)
-
 summary = "Commit in %s by %s: %s" % (module, user, cut(commit_msg))
 text = ""
 
+defopts = { 'url': CVSWEB_URL, 'module': module }
 for filename, oldrev, newrev in grouped(files, 3):
-   text += "%s: %s->%s\n" % (filename, oldrev, newrev)
+    opts = defopts
+    opts['file'] = filename
+
+    opts['rev'] = newrev
+    log_url = LOG_URL % opts
+
+    opts['rev'] = oldrev
+    r1_url = CO_URL % opts
+
+    opts['rev'] = newrev
+    r2_url = CO_URL % opts
+
+    opts['r1'] = oldrev
+    opts['r2'] = newrev
+    diff_url = DIFF_URL % opts
+
+    text += "<%s|%s>: <%s|r%s> <%s|→> <%s|r%s>\n" % (log_url, filename, r1_url, oldrev, diff_url, r2_url, newrev)
 
 attachments = [{
     "fallback": text,
