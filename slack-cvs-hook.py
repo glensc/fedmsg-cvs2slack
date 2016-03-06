@@ -30,10 +30,12 @@ from pprint import pprint
 
 user, module = sys.argv[1:3]
 files = sys.argv[3:]
+commit_msg = sys.stdin.readlines()
 
 pprint(user)
 pprint(module)
 pprint(files)
+pprint(commit_msg)
 
 for filename, oldrev, newrev in grouped(files, 3):
    print "%s : %s->%s" % (filename, oldrev, newrev)
