@@ -6,26 +6,27 @@
 #
 # Setup:
 # Put to CVSROOT/loginfo:
-# ALL $CVSROOT/CVSROOT/slack-cvs-hook $USER %p %{sVv}
+# ALL $CVSROOT/CVSROOT/slack-cvs-hook /path/to/config.conf $USER %p %{sVv}
 
 import sys
 import subprocess
 from itertools import izip
 import slackweb
 
-# Get token from https://my.slack.com/services/new/incoming-webhook/
-HOOK_URL = 'https://hooks.slack.com/services/T.../B.../...'
-# URL to CVSWEB
-CVSWEB_URL = "https://cvs.example.net"
-# #channel or @nick to post to
-CHANNEL = "@glen"
-# Username to show in webook
-USERNAME = "CVS Commit"
+def parse_config(filename):
+    """Parse configuration file.
 
-# viewvc specific
-CO_URL = '%(url)s/%(module)s/%(file)s?rev=%(rev)s&content-type=text/x-cvsweb-markup'
-DIFF_URL = '%(url)s/%(module)s/%(file)s?r1=%(r1)s&r2=%(r2)s&f=h'
-LOG_URL = '%(url)s/%(module)s/%(file)s?r1=%(rev)s#rev%(rev)s'
+    Args:
+      filename: Path to the configuration file to parse.
+    Returns:
+      Dictionary of values defined in the file.
+    """
+    with open(filename) as f:
+        data = f.read()
+        compiled = compile(data, filename, "exec")
+        result = { 'main': sys.modules[__name__] }
+        eval(compiled, result)
+        return result
 
 # http://stackoverflow.com/a/5389547
 def grouped(iterable, n):
@@ -60,31 +61,32 @@ def cut(s, maxlen = 24):
         return s[0:maxlen] + "..."
     return s
 
-user, module = sys.argv[1:3]
-files = sys.argv[3:]
+user, module = sys.argv[2:4]
+files = sys.argv[4:]
 commit_msg = get_commit_message()
+c = parse_config(sys.argv[1])
 
-module_url = "%s/%s" % (CVSWEB_URL, module)
+module_url = "%s/%s" % (c['CVSWEB_URL'], module)
 summary = "in *<%s|%s>* by *%s*: %s" % (module_url, module, user, cut(commit_msg))
 text = ""
 
-defopts = { 'url': CVSWEB_URL, 'module': module }
+defopts = { 'url': c['CVSWEB_URL'], 'module': module }
 for filename, oldrev, newrev in grouped(files, 3):
     opts = defopts
     opts['file'] = filename
 
     opts['rev'] = newrev
-    log_url = LOG_URL % opts
+    log_url = c['LOG_URL'] % opts
 
     opts['rev'] = oldrev
-    r1_url = CO_URL % opts
+    r1_url = c['CO_URL'] % opts
 
     opts['rev'] = newrev
-    r2_url = CO_URL % opts
+    r2_url = c['CO_URL'] % opts
 
     opts['r1'] = oldrev
     opts['r2'] = newrev
-    diff_url = DIFF_URL % opts
+    diff_url = c['DIFF_URL'] % opts
 
     text += "<%s|%s>: <%s|r%s> <%s|→> <%s|r%s>\n" % (log_url, filename, r1_url, oldrev, diff_url, r2_url, newrev)
 
@@ -94,5 +96,5 @@ attachments = [{
     "color": "good",
 }]
 
-slack = slackweb.Slack(url=HOOK_URL)
-slack.notify(text=summary, attachments=attachments, channel=CHANNEL, username=USERNAME)
+slack = slackweb.Slack(url=c['HOOK_URL'])
+slack.notify(text=summary, attachments=attachments, channel=c['CHANNEL'], username=c['USERNAME'])
