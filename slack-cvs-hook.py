@@ -54,7 +54,11 @@ def get_commit_message():
         if lines[i] == "Log Message:\n":
             break
 
-    return "".join(lines[i + 1:]).strip()
+    return lines[i + 1:]
+
+def get_commit_summary():
+    lines = get_commit_message()
+    return lines[0].strip()
 
 def cut(s, maxlen = 24):
     if len(s) > maxlen:
@@ -63,7 +67,7 @@ def cut(s, maxlen = 24):
 
 user, module = sys.argv[2:4]
 files = sys.argv[4:]
-commit_msg = get_commit_message()
+commit_msg = get_commit_summary()
 c = parse_config(sys.argv[1])
 
 module_url = "%s/%s" % (c['CVSWEB_URL'], module)
