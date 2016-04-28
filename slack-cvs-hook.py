@@ -71,7 +71,7 @@ commit_msg = get_commit_summary()
 c = parse_config(sys.argv[1])
 
 module_url = "%s/%s" % (c['CVSWEB_URL'], module)
-summary = "in *<%s|%s>* by *%s*: %s" % (module_url, module, user, cut(commit_msg))
+summary = "in *<%s|%s>* by *%s*: %s" % (module_url, module, user, commit_msg)
 text = ""
 
 defopts = { 'url': c['CVSWEB_URL'], 'module': module }
