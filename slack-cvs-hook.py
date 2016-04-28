@@ -70,7 +70,7 @@ files = sys.argv[4:]
 commit_msg = get_commit_summary()
 c = parse_config(sys.argv[1])
 
-module_url = "%s/%s" % (c['CVSWEB_URL'], module)
+module_url = "%s/%s/" % (c['CVSWEB_URL'], module)
 summary = "in *<%s|%s>* by *%s*: %s" % (module_url, module, user, commit_msg)
 text = ""
 
