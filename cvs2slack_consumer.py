@@ -5,6 +5,7 @@ response to message on the `fedmsg bus <http://fedmsg.rtfd.org>`_.
 """
 
 import fedmsg.consumers
+import slackweb
 
 class CVS2SlackConsumer(fedmsg.consumers.FedmsgConsumer):
     # cvs2slack.consumer.enabled must be set to True in the config in fedmsg.d/ for
@@ -16,6 +17,11 @@ class CVS2SlackConsumer(fedmsg.consumers.FedmsgConsumer):
         self.topic = self.abs_topic(hub.config, "cvs.commit")
 
         super(CVS2SlackConsumer, self).__init__(hub)
+
+        self.channel = hub.config['cvs2slack.channel']
+        self.username = hub.config['cvs2slack.username']
+
+        self.slack = slackweb.Slack(url=hub.config['cvs2slack.hook_url'])
 
     # no proper way to configure just topic suffix
     # https://github.com/fedora-infra/fedmsg/pull/428
@@ -35,4 +41,4 @@ class CVS2SlackConsumer(fedmsg.consumers.FedmsgConsumer):
         })
         msg = msg['body']['msg']
 
-        message = msg['message']
+        self.slack.notify(text='test', channel=self.channel, username=self.username)
