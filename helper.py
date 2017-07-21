@@ -13,9 +13,11 @@ def transform(msg):
     text = ""
     fallback = ""
     for f in msg['files']:
-        u = f['urls']
-        text += u"<%s|%s>: <%s|r%s> <%s|→> <%s|r%s>\n" % (u['log_url'], f['filename'], u['old_url'], f['old_rev'], u['diff_url'], u['new_url'], f['new_rev'])
-        fallback += u"%s r%s → r%s\n" % (f['filename'], f['old_rev'], f['new_rev'])
+        # create dict of properties and urls
+        d = dict(f, **f['urls'])
+
+        text += u"<%(log_url)s|%(filename)s>: <%(old_url)s|r%(old_rev)s> <%(diff_url)s|→> <%(new_url)s|r%(new_rev)s>\n" % d
+        fallback += u"%(filename)s r%(old_rev)s → r%(new_rev)s\n" % d
 
     attachments = [{
         "fallback": fallback,
