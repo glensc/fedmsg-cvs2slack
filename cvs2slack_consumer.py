@@ -25,6 +25,8 @@ class CVS2SlackConsumer(fedmsg.consumers.FedmsgConsumer):
 
         self.slack = slackweb.Slack(url=hub.config['cvs2slack.hook_url'])
 
+        self.log.info("CVS2Slack[%s]: Posting to <%s> as <%s>" % (self.topic, self.channel, self.username))
+
     # no proper way to configure just topic suffix
     # https://github.com/fedora-infra/fedmsg/pull/428
     def abs_topic(self, config, topic):
