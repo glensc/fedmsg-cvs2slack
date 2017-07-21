@@ -1,4 +1,5 @@
 """
+coding: utf-8
 
 Consumer to show how to write a service that does stuff in
 response to message on the `fedmsg bus <http://fedmsg.rtfd.org>`_.
@@ -6,6 +7,7 @@ response to message on the `fedmsg bus <http://fedmsg.rtfd.org>`_.
 
 import fedmsg.consumers
 import slackweb
+from helper import *
 
 class CVS2SlackConsumer(fedmsg.consumers.FedmsgConsumer):
     # cvs2slack.consumer.enabled must be set to True in the config in fedmsg.d/ for
@@ -39,6 +41,6 @@ class CVS2SlackConsumer(fedmsg.consumers.FedmsgConsumer):
             'user': msg['body']['msg']['user'],
             'message': msg['body']['msg']['message'],
         })
-        msg = msg['body']['msg']
 
-        self.slack.notify(text='test', channel=self.channel, username=self.username)
+        message = transform(msg['body']['msg'])
+        self.slack.notify(text=message['text'], attachments=message['attachments'], channel=self.channel, username=self.username)
